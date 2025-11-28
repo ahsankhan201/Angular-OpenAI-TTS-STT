@@ -1,0 +1,93 @@
+<div class="page-container">
+  <article class="card">
+    <!-- Header -->
+    <header class="card-header">
+      <div class="header-content">
+        <div>
+          <h1 class="card-title">AI Voice Assistant</h1>
+          <p class="card-subtitle">Speak to interact with AI - Your voice will be converted to text and processed</p>
+        </div>
+        @if (messages.length > 0) {
+          <button 
+            type="button"
+            class="btn btn-outline btn-small" 
+            (click)="clearChat()"
+            aria-label="Clear all chat messages">
+            <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+            <span>Clear Chat</span>
+          </button>
+        }
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="card-content">
+      <!-- Chat Messages -->
+      @if (messages.length > 0) {
+        <div 
+          class="chat-container" 
+          role="log" 
+          aria-live="polite" 
+          aria-label="Conversation history"
+          #chatContainer>
+          @for (message of messages; track message.timestamp) {
+            <article 
+              class="message" 
+              [class.user-message]="message.role === 'user'"
+              [class.ai-message]="message.role === 'assistant'"
+              [attr.aria-label]="(message.role === 'user' ? 'Your message' : 'AI response') + ' at ' + (message.timestamp | date:'short')">
+              <div class="message-header">
+                <span class="message-icon material-symbols-outlined" aria-hidden="true">
+                  {{ message.role === 'user' ? 'person' : 'smart_toy' }}
+                </span>
+                <span class="message-role">{{ message.role === 'user' ? 'You' : 'AI Assistant' }}</span>
+                <time class="message-time" [attr.datetime]="message.timestamp.toISOString()">
+                  {{ message.timestamp | date:'short' }}
+                </time>
+              </div>
+              <div class="message-content">{{ message.content }}</div>
+            </article>
+          }
+        </div>
+      } @else {
+        <!-- Empty State -->
+        <div class="empty-state" role="status">
+          <span class="material-symbols-outlined empty-icon" aria-hidden="true">mic</span>
+          <h2>Start a Conversation</h2>
+          <p>Click the microphone button below to record your voice. Your speech will be converted to text and sent to AI for a response.</p>
+        </div>
+      }
+
+      <!-- Recording Controls -->
+      <div class="controls-container" role="region" aria-label="Recording controls">
+        <button 
+          type="button"
+          class="btn btn-large"
+          [class.btn-primary]="!isRecording() && !isProcessing()"
+          [class.btn-recording]="isRecording()"
+          [disabled]="isRecording() && isProcessing()"
+          [attr.aria-label]="isRecording() ? 'Stop recording' : 'Start recording'"
+          [attr.aria-pressed]="isRecording()"
+          (click)="toggleRecording()">
+          <span class="material-symbols-outlined" [class.recording-pulse]="isRecording()" aria-hidden="true">
+            {{ isRecording() ? 'stop' : 'mic' }}
+          </span>
+          <span>{{ isRecording() ? 'Stop Recording' : (isProcessing() ? 'Processing...' : 'Start Recording') }}</span>
+        </button>
+        
+        @if (isRecording()) {
+          <div class="status-text" role="status" aria-live="polite">
+            <span class="recording-indicator" aria-hidden="true"></span>
+            Listening... Speak now
+          </div>
+        }
+        @if (isProcessing()) {
+          <div class="status-text" role="status" aria-live="polite">
+            <span class="processing-indicator" aria-hidden="true"></span>
+            Getting AI response...
+          </div>
+        }
+      </div>
+    </main>
+  </article>
+</div>
